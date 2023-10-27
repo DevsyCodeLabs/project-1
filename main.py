@@ -559,16 +559,14 @@ class BinaryToDecimalScreen(Screen):
 
         return str(decimal)
     
-#octal to binary class
 class OctalToBinaryScreen(Screen):
     def __init__(self, **kwargs):
         super(OctalToBinaryScreen, self).__init__(**kwargs)
-
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        self.layout = BoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
-        self.convert_button.bind(on_release=self.convert)
+        self.convert_button.bind(on_press=self.convert)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
@@ -588,26 +586,16 @@ class OctalToBinaryScreen(Screen):
             self.output_text.text = 'Invalid Input'
 
     def oct_to_bin(self, num):
-        num = str(num)
-        num = num.lstrip('0')
-        if num == '':
-            num = '0'
-        flagdec = False
-        binary = ''
+        try:
+            num = int(num, 8)  # Convert the octal input to an integer
+        except ValueError:
+            raise ValueError
 
-        NumMap = {'0': '000', '1': '001', '2': '010', '3': '011', '4': '100', '5': '101', '6': '110', '7': '111'}
+        if num < 0:
+            raise ValueError("Octal input must be non-negative")
 
-        for i in range(len(num)):
-            if num[i] == '.' and flagdec is False:
-                flagdec = True
-                binary = binary + '.'
-            elif num[i]=='.':
-                return 'Wrong Input. Please check the input again.'
-        
-            else:
-                binary = binary + NumMap[num[i]]
-
-        return binary.lstrip('0').rstrip('0')
+        binary = bin(num)[2:]  # Convert the integer to binary and remove the '0b' prefix
+        return binary
     
 class HexadecimalToBinaryScreen(Screen):
     def __init__(self, **kwargs):
