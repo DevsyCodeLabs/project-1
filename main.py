@@ -13,7 +13,7 @@
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.button import MDFillRoundFlatButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivy.graphics.context_instructions import Color
 from kivy.uix.scrollview import ScrollView
@@ -137,7 +137,7 @@ class Header(BoxLayout):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
-class RippleButton(MDRaisedButton, ButtonBehavior):
+class RippleButton(MDFillRoundFlatButton, ButtonBehavior):
     pass
 # Home Screen Class
 class HomeScreen(Screen):
@@ -184,9 +184,9 @@ class HomeScreen(Screen):
 
         # Create buttons and add them to the grid layout
         for text, callback in conversions:
-             button = RippleButton(text=text, on_release=callback)
+            button = RippleButton(text=text, on_release=callback)
 
-             grid_layout.add_widget(button)
+            grid_layout.add_widget(button)
 
         # Add the grid layout to the buttons layout
         buttons_layout.add_widget(grid_layout)
@@ -254,7 +254,7 @@ class DecimalToBinaryScreen(Screen):
             orientation="vertical", padding=40, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a decimal number")
-        self.convert_button = MDRaisedButton(
+        self.convert_button = MDFillRoundFlatButton(
             text="Convert", on_release=self.convert)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -333,7 +333,7 @@ class BinaryToOctalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -420,7 +420,7 @@ class BinaryToHexScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -507,7 +507,7 @@ class BinaryToDecimalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -567,7 +567,7 @@ class OctalToBinaryScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -616,7 +616,7 @@ class HexadecimalToBinaryScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -672,7 +672,7 @@ class DecimalToOctalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -708,7 +708,7 @@ class OctalToDecimalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -743,7 +743,7 @@ class HexadecimalToOctalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -779,7 +779,7 @@ class DecimalToHexadecimalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -814,7 +814,7 @@ class OctalToHexadecimalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -849,7 +849,7 @@ class HexadecimalToDecimalScreen(Screen):
         self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
-        self.convert_button = MDRaisedButton(text="Convert")
+        self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
