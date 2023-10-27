@@ -1,10 +1,16 @@
 # Number System Converter App
 # This is a school assignment project that allows you to convert numbers between different number systems.
 # The app is designed to run on Android devices.
-#Developed and Designed by Group 2 
+#Developed and Designed by Kirinyaga University Students Digital Logic Group 2 
+#Members
+# 1. ISAAC GATHUA MURERE - CT100/G/15897/22
+# 2. JOSEPH MWAURA MWARIRI - CT100/G/15893/22
+# 3. JAMES MUITA - CT100/G/15929/22
+# 4. RYAN WEKWSA SIMIYU - CT100/G/15984/22
+# 5. ELIJAH MURAGE - CT100/S/20598/23
+# copyright 2023 - Group 2
 # Import KivyMD dependencies
 from kivymd.app import MDApp
-from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRaisedButton
@@ -13,16 +19,22 @@ from kivy.graphics.context_instructions import Color
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.textfield import MDTextField  # Import MDTextField  
 from kivy.uix.screenmanager import ScreenManager, Screen
-
+from kivymd.uix.button import MDIconButton
+from kivy.graphics import Color, Rectangle
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.behaviors import ButtonBehavior
 
 class NumberSystemConverterApp(MDApp):
     def build(self):
-        self.theme_cls.theme_style = "Light"
+
+        self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
 
         self.screen_manager = ScreenManager()
 
         self.home_screen = HomeScreen(name='home')
+        self.settings_screen = SettingsScreen(
+            name='settings')
         self.decimal_to_binary_screen = DecimalToBinaryScreen(
             name='decimal_to_binary')
 
@@ -59,7 +71,9 @@ class NumberSystemConverterApp(MDApp):
         self.hexadecimal_to_decimal_screen = HexadecimalToDecimalScreen(
             name='hexadecimal_to_decimal')
 
+
         self.screen_manager.add_widget(self.home_screen)
+        self.screen_manager.add_widget(self.settings_screen)
         self.screen_manager.add_widget(self.decimal_to_binary_screen)
         self.screen_manager.add_widget(self.binary_to_octal_screen)
         self.screen_manager.add_widget(self.binary_to_hexadecimal_screen)
@@ -83,32 +97,48 @@ class NumberSystemConverterApp(MDApp):
         self.layout.add_widget(self.screen_manager)
 
         return self.layout
-    def toggle_theme(self, instance):
-        if self.theme_cls.theme_style == "Light":
-            self.theme_cls.theme_style = "Dark"
-        else:
-            self.theme_cls.theme_style = "Light"
 
 # Header Class
-class Header(MDBoxLayout):
+class Header(BoxLayout):
     def __init__(self, **kwargs):
-        super(Header, self).__init__(orientation="horizontal",
-                                     size_hint=(1, None), height="48dp")
+        super(Header, self).__init__(orientation="horizontal", size_hint=(1, None), height="48dp")
 
-        self.back_button = MDRaisedButton(text="Back", on_release=self.back)
-        self.title_label = MDLabel(halign="center", font_style="H6")
+        with self.canvas:
+            # Set the background color
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+
+        self.bind(pos=self.update_rect, size=self.update_rect)
+
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+        self.title_label = MDLabel(text="Number Systems Converter", halign="center", valign="middle", theme_text_color="Secondary")
+        
+       # Settings icon with a click event to open the Settings screen
+        self.settings_button = MDIconButton(icon="information-outline", theme_text_color="Secondary")
+        self.settings_button.bind(on_release=self.open_settings_screen)
+
 
         self.add_widget(self.back_button)
+        
         self.add_widget(self.title_label)
+        self.add_widget(self.settings_button)
 
-        self.theme_button = MDRaisedButton(text="Toggle Theme", on_release=self.toggle_theme)
+    
+
+    def open_settings_screen(self, instance):
+        # Open the Settings screen
+        self.screen_manager.current = "settings"
 
     def back(self, instance):
         self.screen_manager.current = self.current_screen
 
-    def toggle_theme(self, instance):
-        MDApp.get_running_app().toggle_theme()
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 
+class RippleButton(MDRaisedButton, ButtonBehavior):
+    pass
 # Home Screen Class
 class HomeScreen(Screen):
     def __init__(self, **kwargs):
@@ -119,14 +149,16 @@ class HomeScreen(Screen):
         
         # Create a label for the title
         home_label = MDLabel(
-            text="Number System Converter",
+            text="Welcome!! Enjoy Our App!",
             halign="center",
             font_style="H4",
         )
+        
         content_layout.add_widget(home_label)
+        
 
         # Create a BoxLayout to center-align the buttons
-        buttons_layout = MDBoxLayout(orientation='horizontal', spacing=20, size_hint_y=None, height=100)
+        buttons_layout = MDBoxLayout(orientation='horizontal',  spacing=20, size_hint_y=None, height=100)
 
         # Create a grid layout for the buttons
         grid_layout = MDGridLayout(
@@ -152,13 +184,9 @@ class HomeScreen(Screen):
 
         # Create buttons and add them to the grid layout
         for text, callback in conversions:
-            button = MDRaisedButton(text=text, on_release=callback)
+             button = RippleButton(text=text, on_release=callback)
 
-            # Set a transparent canvas to prevent black spots
-            with button.canvas.before:
-                Color(0, 0, 0, 0)  # Transparent color
-
-            grid_layout.add_widget(button)
+             grid_layout.add_widget(button)
 
         # Add the grid layout to the buttons layout
         buttons_layout.add_widget(grid_layout)
@@ -172,6 +200,12 @@ class HomeScreen(Screen):
 
         # Add the content layout to the screen
         self.add_widget(content_layout)
+        # Create a transparent protective layer to prevent anything from being displayed on top of buttons
+        with buttons_layout.canvas.before:
+            Color(0, 0, 0, 0)  # Transparent color
+            Rectangle(pos=buttons_layout.pos, size=buttons_layout.size)
+
+        
 
     def open_decimal_to_binary(self, instance):
         self.manager.current = "decimal_to_binary"
@@ -664,7 +698,7 @@ class DecimalToOctalScreen(Screen):
             octal = oct(decimal_num).replace("0o", "")
             return octal
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
         
 #octal to decimal screen
 class OctalToDecimalScreen(Screen):
@@ -699,7 +733,7 @@ class OctalToDecimalScreen(Screen):
             decimal_num = int(num, 8)
             return str(decimal_num)
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
 
 #hexadeciml to octal  
 class HexadecimalToOctalScreen(Screen):
@@ -735,7 +769,7 @@ class HexadecimalToOctalScreen(Screen):
             octal = oct(num).replace("0o", "")  # Convert decimal to octal
             return octal
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
         
 #decimal to hexadecimal
 class DecimalToHexadecimalScreen(Screen):
@@ -771,7 +805,7 @@ class DecimalToHexadecimalScreen(Screen):
             hexadecimal = hex(decimal_num).replace("0x", "").upper()
             return hexadecimal
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
         
 class OctalToHexadecimalScreen(Screen):
     def __init__(self, **kwargs):
@@ -806,7 +840,7 @@ class OctalToHexadecimalScreen(Screen):
             hexadecimal = hex(num).replace("0x", "").upper()  # Convert decimal to hexadecimal
             return hexadecimal
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
         
 class HexadecimalToDecimalScreen(Screen):
     def __init__(self, **kwargs):
@@ -840,7 +874,51 @@ class HexadecimalToDecimalScreen(Screen):
             decimal_num = int(num, 16)
             return str(decimal_num)
         except ValueError:
-            raise ValueError('Invalid Input. Please check the input again')
+            raise ValueError('Invalid Input. Please check the input and try again')
+
+class SettingsScreen(Screen):
+    def __init__(self, **kwargs):
+        super(SettingsScreen, self).__init__(**kwargs)
+
+        self.orientation = "vertical"
+        self.padding = "16dp"
+
+        # Create a layout for copyright, powered by, and version information
+        info_layout = MDBoxLayout(orientation="vertical", spacing="10dp")
+        
+        copyright_label = MDLabel(
+            text="Designed and Developed by Group 2",
+            theme_text_color="Secondary",
+            halign="center"
+        )
+
+        powered_label = MDLabel(
+            text="DEVELOPERS & MEMBERS\n\n"
+                 "1. ISAAC GATHUA - CT100/G/15897/22\n"
+                 "2. JOSEPH MWAURA - CT100/G/15893/22\n"
+                 "3. JAMES MUITA - CT100/G/15929/22\n"
+                 "4. RYAN WEKWSA - CT100/G/15984/22\n"
+                 "5. ELIJAH MURAGE - CT100/S/20598/23\n\n"
+                 "Special Thanks To All The Members.",
+            theme_text_color="Secondary",
+            halign="left",
+            padding=30,
+        )
+
+        
+        version_label = MDLabel(
+            text="Version 0.1.0",
+            theme_text_color="Secondary",
+            halign="center"
+        )
+
+        info_layout.add_widget(copyright_label)
+        info_layout.add_widget(powered_label)
+        info_layout.add_widget(version_label)
+
+        # Add your settings widgets he
+        self.add_widget(MDBoxLayout())  # This is a spacer for layout separation
+        self.add_widget(info_layout)  # Add the info layout
 
 # Main program entry point
 if __name__ == '__main__':
