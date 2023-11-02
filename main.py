@@ -14,19 +14,23 @@ from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDFillRoundFlatButton
-from kivymd.uix.gridlayout import MDGridLayout
+from kivymd.uix.gridlayout import GridLayout
 from kivy.graphics.context_instructions import Color
 from kivy.uix.scrollview import ScrollView
 from kivymd.uix.textfield import MDTextField  # Import MDTextField  
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDRectangleFlatButton
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.image import AsyncImage
+from kivy.core.window import Window
+from kivy.metrics import dp
+from kivymd.theming import ThemeManager
 
 class NumberSystemConverterApp(MDApp):
     def build(self):
-
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
 
@@ -87,84 +91,64 @@ class NumberSystemConverterApp(MDApp):
         self.screen_manager.add_widget(self.octal_to_hexadecimal_screen)
         self.screen_manager.add_widget(self.hexadecimal_to_decimal_screen)
 
-        self.header = Header()
-        self.header.screen_manager = self.screen_manager
-        self.header.current_screen = "home"
-
         self.layout = MDBoxLayout(orientation="vertical")
+        
 
-        self.layout.add_widget(self.header)
+       
         self.layout.add_widget(self.screen_manager)
 
         return self.layout
 
 # Header Class
-class Header(BoxLayout):
-    def __init__(self, **kwargs):
-        super(Header, self).__init__(orientation="horizontal", size_hint=(1, None), height="48dp")
-
-        with self.canvas:
-            # Set the background color
-            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
-
-            self.rect = Rectangle(pos=self.pos, size=self.size)
-
-        self.bind(pos=self.update_rect, size=self.update_rect)
-
-        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
-        self.title_label = MDLabel(text="Number Systems Converter", halign="center", valign="middle", theme_text_color="Secondary")
-        
-       # Settings icon with a click event to open the Settings screen
-        self.settings_button = MDIconButton(icon="information-outline", theme_text_color="Secondary")
-        self.settings_button.bind(on_release=self.open_settings_screen)
-
-
-        self.add_widget(self.back_button)
-        
-        self.add_widget(self.title_label)
-        self.add_widget(self.settings_button)
-
     
-
-    def open_settings_screen(self, instance):
-        # Open the Settings screen
-        self.screen_manager.current = "settings"
-
-    def back(self, instance):
-        self.screen_manager.current = self.current_screen
-
-    def update_rect(self, instance, value):
-        self.rect.pos = instance.pos
-        self.rect.size = instance.size
 
 class RippleButton(MDFillRoundFlatButton, ButtonBehavior):
     pass
-# Home Screen Class
 class HomeScreen(Screen):
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
 
         # Create a BoxLayout to arrange the content vertically
-        content_layout = MDBoxLayout(orientation='vertical', spacing=0, padding=[20, 20])
+        content_layout = BoxLayout(orientation='vertical', spacing=0)
+
+        # Create a header with a green background color
+        header = BoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        self.y_button = MDIconButton(icon="")
+        # Create a title label
+        self.title_label = MDLabel(text="Number Systems Converter", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Create a settings button with a click event to open the Settings screen
+        self.settings_button = MDIconButton(icon="information-outline", theme_text_color="Secondary")
+        self.settings_button.bind(on_release=self.open_settings_screen)
+
+        # Add widgets to the header
+        header.add_widget(self.y_button)
+        header.add_widget(self.title_label)
+        header.add_widget(self.settings_button)
         
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+
         # Create a label for the title
         home_label = MDLabel(
             text="Welcome!! Enjoy Our App!",
             halign="center",
             font_style="H4",
         )
-        
-        content_layout.add_widget(home_label)
-        
 
-        # Create a BoxLayout to center-align the buttons
-        buttons_layout = MDBoxLayout(orientation='horizontal',  spacing=20, size_hint_y=None, height=100)
+        content_layout.add_widget(home_label)
 
         # Create a grid layout for the buttons
-        grid_layout = MDGridLayout(
-            cols=2,
-            spacing=10,
-        )
+        grid_layout = GridLayout(cols=2, spacing=dp(10), padding=dp(20))
+        grid_layout.id = 'grid_layout'  # Assign an ID to the grid_layout
 
         # Buttons for various conversions and their reverses
         conversions = [
@@ -184,28 +168,21 @@ class HomeScreen(Screen):
 
         # Create buttons and add them to the grid layout
         for text, callback in conversions:
-            button = RippleButton(text=text, on_release=callback)
-
+            button = MDFillRoundFlatButton(text=text, on_release=callback)
             grid_layout.add_widget(button)
-
-        # Add the grid layout to the buttons layout
-        buttons_layout.add_widget(grid_layout)
 
         # Create a ScrollView to handle scrolling on smaller screens
         scroll_view = ScrollView()
-        scroll_view.add_widget(buttons_layout)
+        scroll_view.add_widget(grid_layout)
+
+        # Store a reference to the grid layout as an instance variable
+        self.grid_layout = grid_layout
 
         # Add the ScrollView to the content layout
         content_layout.add_widget(scroll_view)
 
         # Add the content layout to the screen
         self.add_widget(content_layout)
-        # Create a transparent protective layer to prevent anything from being displayed on top of buttons
-        with buttons_layout.canvas.before:
-            Color(0, 0, 0, 0)  # Transparent color
-            Rectangle(pos=buttons_layout.pos, size=buttons_layout.size)
-
-        
 
     def open_decimal_to_binary(self, instance):
         self.manager.current = "decimal_to_binary"
@@ -243,31 +220,68 @@ class HomeScreen(Screen):
     def open_hexadecimal_to_octal(self, instance):
         self.manager.current = "hexadecimal_to_octal"
 
+    def open_settings_screen(self, instance):
+        # Open the Settings screen
+        self.manager.current = "settings"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
+
 # class for decimal to binary
-
-
 class DecimalToBinaryScreen(Screen):
     def __init__(self, **kwargs):
         super(DecimalToBinaryScreen, self).__init__(**kwargs)
 
-        self.layout = MDBoxLayout(
-            orientation="vertical", padding=40, spacing=20)
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Decimal To Binary Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
         self.input_text = MDTextField(hint_text="Enter a decimal number")
         self.convert_button = MDFillRoundFlatButton(
             text="Convert", on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
         self.convert_button.bind(on_release=self.convert)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        # Add the input and output elements to the content layout
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
+
+    
     def convert(self, instance):
         decimal_input = self.input_text.text
         try:
@@ -324,26 +338,68 @@ class DecimalToBinaryScreen(Screen):
 
         bin_num = bin_num + '.' + temp_bin
         return bin_num
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
 
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 
 class BinaryToOctalScreen(Screen):
     def __init__(self, **kwargs):
         super(BinaryToOctalScreen, self).__init__(**kwargs)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
+
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Binary To Octal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         binary_input = self.input_text.text
@@ -411,26 +467,69 @@ class BinaryToOctalScreen(Screen):
             begining_marker = end_marker
 
         return octal
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
 
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 #screen for binary to hexadecimal
 class BinaryToHexScreen(Screen):
     def __init__(self, **kwargs):
         super(BinaryToHexScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Binary To HexaDecimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         binary_input = self.input_text.text
@@ -499,25 +598,69 @@ class BinaryToHexScreen(Screen):
             begining_marker = end_marker
 
         return hexadecimal
+
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 #binary to decimal
 class BinaryToDecimalScreen(Screen):
     def __init__(self, **kwargs):
         super(BinaryToDecimalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Binary To Decimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         binary_input = self.input_text.text
@@ -558,24 +701,68 @@ class BinaryToDecimalScreen(Screen):
             decimal += int(decimal_part[i]) * (2 ** (-i - 1))
 
         return str(decimal)
+
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
     
 class OctalToBinaryScreen(Screen):
     def __init__(self, **kwargs):
         super(OctalToBinaryScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
+
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Octal To Binary Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
         self.layout = BoxLayout(orientation="vertical", padding=60, spacing=20)
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_press=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         octal_input = self.input_text.text
@@ -587,34 +774,80 @@ class OctalToBinaryScreen(Screen):
 
     def oct_to_bin(self, num):
         try:
-            num = int(num, 8)  # Convert the octal input to an integer
+            num = int(num, 8) 
+             # Convert the octal input to an integer
         except ValueError:
             raise ValueError
+        
 
         if num < 0:
             raise ValueError("Octal input must be non-negative")
 
         binary = bin(num)[2:]  # Convert the integer to binary and remove the '0b' prefix
         return binary
+
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
     
 class HexadecimalToBinaryScreen(Screen):
     def __init__(self, **kwargs):
         super(HexadecimalToBinaryScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Hexadecimal To Binary Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         hexadecimal_input = self.input_text.text
@@ -651,26 +884,70 @@ class HexadecimalToBinaryScreen(Screen):
                 binary += NumMap[char]
 
         return binary.lstrip('0').rstrip('.')
+
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
     
 #decimal to octal screen
 class DecimalToOctalScreen(Screen):
     def __init__(self, **kwargs):
         super(DecimalToOctalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Decimal To Octal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         decimal_input = self.input_text.text
@@ -687,26 +964,70 @@ class DecimalToOctalScreen(Screen):
             return octal
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
         
 #octal to decimal screen
 class OctalToDecimalScreen(Screen):
     def __init__(self, **kwargs):
         super(OctalToDecimalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Octal To Decimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         octal_input = self.input_text.text
@@ -722,26 +1043,70 @@ class OctalToDecimalScreen(Screen):
             return str(decimal_num)
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 
 #hexadeciml to octal  
 class HexadecimalToOctalScreen(Screen):
     def __init__(self, **kwargs):
         super(HexadecimalToOctalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Hexadecimal To Octal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         hexadecimal_input = self.input_text.text
@@ -758,26 +1123,70 @@ class HexadecimalToOctalScreen(Screen):
             return octal
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
         
 #decimal to hexadecimal
 class DecimalToHexadecimalScreen(Screen):
     def __init__(self, **kwargs):
         super(DecimalToHexadecimalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Decimal To Hexadecimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         decimal_input = self.input_text.text
@@ -794,25 +1203,69 @@ class DecimalToHexadecimalScreen(Screen):
             return hexadecimal
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
         
 class OctalToHexadecimalScreen(Screen):
     def __init__(self, **kwargs):
         super(OctalToHexadecimalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Octal To Hexadecimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         octal_input = self.input_text.text
@@ -829,25 +1282,69 @@ class OctalToHexadecimalScreen(Screen):
             return hexadecimal
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
         
 class HexadecimalToDecimalScreen(Screen):
     def __init__(self, **kwargs):
         super(HexadecimalToDecimalScreen, self).__init__(**kwargs)
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
-        self.layout = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Hexadecimal To Decimal Conversion", halign="center", valign="middle", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
+        body = MDBoxLayout(orientation="vertical", padding=60, spacing=20)
+
+        
 
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
+        self.clear_button = MDRectangleFlatButton(
+            text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
 
-        self.layout.add_widget(self.input_text)
-        self.layout.add_widget(self.convert_button)
-        self.layout.add_widget(self.output_label)
-        self.layout.add_widget(self.output_text)
+        body.add_widget(self.input_text)
+        body.add_widget(self.convert_button)
+        body.add_widget(self.clear_button)
+        body.add_widget(self.output_label)
+        body.add_widget(self.output_text)
 
-        self.add_widget(self.layout)
+        # Add the body to the content layout
+        content_layout.add_widget(body)
+        self.add_widget(content_layout)
 
     def convert(self, instance):
         hexadecimal_input = self.input_text.text
@@ -863,16 +1360,58 @@ class HexadecimalToDecimalScreen(Screen):
             return str(decimal_num)
         except ValueError:
             raise ValueError('Invalid Input. Please check the input and try again')
+    
+    def clear(self, instance):
+        self.input_text.text = ""
+        self.output_text.text = ""
+    
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 
 class SettingsScreen(Screen):
     def __init__(self, **kwargs):
         super(SettingsScreen, self).__init__(**kwargs)
+       
+        self.theme_cls = ThemeManager()
+        
+        # Create a BoxLayout to center the content below the header
+        content_layout = MDBoxLayout(orientation="vertical", padding=0, spacing=0)
 
+        # Create a header with a green background color
+        header = MDBoxLayout(orientation='horizontal', size_hint=(1, None), height="48dp")
+        with header.canvas:
+            Color(0.0, 0.5, 0.5, 0.7)  # Teal color (RGBA)
+            self.rect = Rectangle(pos=header.pos, size=header.size)
+
+        # Update the background when the position or size changes
+        header.bind(pos=self.update_rect, size=self.update_rect)
+
+        # Create a back button
+        self.back_button = MDIconButton(icon="arrow-left", on_release=self.back, theme_text_color="Secondary")
+
+        # Create a title label
+        self.title_label = MDLabel(text="Settings & Info About App", halign="center", valign="middle", theme_text_color="Secondary")
+
+        self.theme_switch_button = MDIconButton(icon="", theme_text_color="Secondary")
+
+        # Add widgets to the header
+        header.add_widget(self.back_button)
+        header.add_widget(self.title_label)
+        header.add_widget(self.theme_switch_button)
+
+        # Add the header to the content layout
+        content_layout.add_widget(header)
+        
         self.orientation = "vertical"
         self.padding = "16dp"
 
         # Create a layout for copyright, powered by, and version information
-        info_layout = MDBoxLayout(orientation="vertical", spacing="10dp")
+        body = MDBoxLayout(orientation="vertical", spacing="10dp")
         
         copyright_label = MDLabel(
             text="Designed and Developed by Group 2",
@@ -900,14 +1439,23 @@ class SettingsScreen(Screen):
             halign="center"
         )
 
-        info_layout.add_widget(copyright_label)
-        info_layout.add_widget(powered_label)
-        info_layout.add_widget(version_label)
+        body.add_widget(copyright_label)
+        body.add_widget(powered_label)
+        body.add_widget(version_label)
 
         # Add your settings widgets he
-        self.add_widget(MDBoxLayout())  # This is a spacer for layout separation
-        self.add_widget(info_layout)  # Add the info layout
+        content_layout.add_widget(body)
+        
+        self.add_widget(content_layout)  # Add the info layout
 
+       
+
+    def back(self, instance):
+        self.manager.current = "home"
+
+    def update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
 # Main program entry point
 if __name__ == '__main__':
     # Run the Number System Converter App
