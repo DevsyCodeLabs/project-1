@@ -1424,7 +1424,7 @@ class SettingsScreen(Screen):
                  "1. ISAAC GATHUA - CT100/G/15897/22\n"
                  "2. JOSEPH MWAURA - CT100/G/15893/22\n"
                  "3. JAMES MUITA - CT100/G/15929/22\n"
-                 "4. RYAN WEKWSA - CT100/G/15984/22\n"
+                 "4. RYAN WEKESA - CT100/G/15984/22\n"
                  "5. ELIJAH MURAGE - CT100/S/20598/23\n\n"
                  "Special Thanks To All The Members.",
             theme_text_color="Secondary",
