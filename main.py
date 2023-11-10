@@ -20,14 +20,17 @@ from kivy.uix.scrollview import ScrollView
 from kivymd.uix.textfield import MDTextField  # Import MDTextField  
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.button import MDIconButton
-from kivymd.uix.button import MDRectangleFlatButton
+from kivymd.uix.button import MDRoundFlatButton
+from kivymd.uix.button import MDRoundFlatButton
 from kivy.graphics import Color, Rectangle
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import AsyncImage
+from kivymd.uix.dialog import MDDialog
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivymd.theming import ThemeManager
+from kivymd.uix.button import MDRectangleFlatButton
 
 class NumberSystemConverterApp(MDApp):
     def build(self):
@@ -97,7 +100,44 @@ class NumberSystemConverterApp(MDApp):
        
         self.layout.add_widget(self.screen_manager)
 
+        self.confirmation_dialog = MDDialog(
+            title="Exit App",
+            text="Do you really want to exit the app?",
+            buttons=[
+                MDRoundFlatButton(
+                    text="Cancel", on_release=self.close_confirmation_dialog
+                ),
+                MDRectangleFlatButton(
+                    text="Exit", on_release=self.exit_app
+                ),
+            ],
+        )
+
+        Window.bind(on_keyboard=self.on_key_down)
+
         return self.layout
+
+    def on_key_down(self, window, key, scancode, codepoint, modifier):
+        # Override the default behavior for the "Escape" key
+        if key == 27:  # 27 is the key code for the "Escape" key
+            current_screen_name = self.screen_manager.current
+            if current_screen_name == 'home':
+                # Show confirmation dialog on home screen
+                self.confirmation_dialog.open()
+                return True  # Prevent default behavior
+
+            elif current_screen_name != 'home':
+                # Switch to the 'home' screen
+                self.screen_manager.current = 'home'
+                return True  # Prevent default behavior
+
+        return False  # Continue with default behavior
+    def close_confirmation_dialog(self, instance):
+        self.confirmation_dialog.dismiss()
+
+    def exit_app(self, instance):
+        self.confirmation_dialog.dismiss()
+        self.stop()
 
 # Header Class
     
@@ -262,7 +302,7 @@ class DecimalToBinaryScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a decimal number")
         self.convert_button = MDFillRoundFlatButton(
             text="Convert", on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -386,7 +426,7 @@ class BinaryToOctalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -516,7 +556,7 @@ class BinaryToHexScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -647,7 +687,7 @@ class BinaryToDecimalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Binary number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -749,7 +789,7 @@ class OctalToBinaryScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_press=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -834,7 +874,7 @@ class HexadecimalToBinaryScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Binary equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -934,7 +974,7 @@ class DecimalToOctalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -1014,7 +1054,7 @@ class OctalToDecimalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -1093,7 +1133,7 @@ class HexadecimalToOctalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Octal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -1173,7 +1213,7 @@ class DecimalToHexadecimalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Decimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -1252,7 +1292,7 @@ class OctalToHexadecimalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter an Octal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Hexadecimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
@@ -1331,7 +1371,7 @@ class HexadecimalToDecimalScreen(Screen):
         self.input_text = MDTextField(hint_text="Enter a Hexadecimal number")
         self.convert_button = MDFillRoundFlatButton(text="Convert")
         self.convert_button.bind(on_release=self.convert)
-        self.clear_button = MDRectangleFlatButton(
+        self.clear_button = MDRoundFlatButton(
             text="Clear", on_release=self.clear)
         self.output_label = MDLabel(text="Decimal equivalent:", halign="center")
         self.output_text = MDTextField(readonly=True)
