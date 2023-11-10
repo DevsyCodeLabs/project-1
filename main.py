@@ -1454,21 +1454,15 @@ class SettingsScreen(Screen):
         body = MDBoxLayout(orientation="vertical", spacing="10dp")
         
         copyright_label = MDLabel(
-            text="Designed and Developed by Group 2",
+            text="Designed and Developed by Isaac Gathua - 0745805901",
             theme_text_color="Secondary",
             halign="center"
         )
 
         powered_label = MDLabel(
-            text="DEVELOPERS & MEMBERS\n\n"
-                 "1. ISAAC GATHUA - CT100/G/15897/22\n"
-                 "2. JOSEPH MWAURA - CT100/G/15893/22\n"
-                 "3. JAMES MUITA - CT100/G/15929/22\n"
-                 "4. RYAN WEKESA - CT100/G/15984/22\n"
-                 "5. ELIJAH MURAGE - CT100/S/20598/23\n\n"
-                 "Special Thanks To All The Members.",
+            text="Powered by DevsyTech",
             theme_text_color="Secondary",
-            halign="left",
+            halign="center",
             padding=30,
         )
 
