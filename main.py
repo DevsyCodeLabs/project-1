@@ -107,7 +107,7 @@ class NumberSystemConverterApp(MDApp):
                 MDRoundFlatButton(
                     text="Cancel", on_release=self.close_confirmation_dialog
                 ),
-                MDRectangleFlatButton(
+                MDFillRoundFlatButton(
                     text="Exit", on_release=self.exit_app
                 ),
             ],
